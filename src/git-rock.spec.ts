@@ -51,4 +51,24 @@ describe('GitRock', () => {
     await sut.getStars('any_company')
     expect(cacheSpy).toBeCalledWith('any_company')
   })
+
+  test('Should call set in CacheMock with correct value if get return undefined', async () => {
+    const {
+      sut,
+      cacheMock
+    } = makeSut()
+
+    const cacheSpy = jest.spyOn(cacheMock, 'set')
+    await sut.getStars('any_company')
+    expect(cacheSpy).toBeCalledWith('any_company', JSON.stringify([
+      {
+        name: 'repositoryA',
+        stars: 10
+      },
+      {
+        name: 'repositoryB',
+        stars: 15
+      }
+    ]) )
+  })
 })
