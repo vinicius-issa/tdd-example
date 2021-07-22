@@ -54,6 +54,7 @@ describe('GitRock', () => {
     await sut.getStars('any_company')
     expect(cacheSpy).toBeCalledWith('any_company')
   })
+  
 
   test('Should call set in CacheMock with correct value if get return undefined', async () => {
     const {
@@ -78,5 +79,35 @@ describe('GitRock', () => {
     )
     await sut.getStars('any_company')
     expect(cacheSpySet).not.toBeCalled()
+  })
+
+  test('Should return value in cache, if exist', async () => {
+    const {
+      sut,
+      cacheMock
+    } = makeSut()
+    const resultCache = [{
+      name: 'any_name',
+      stars: 1
+    }]
+    const cacheSpySet = jest.spyOn(cacheMock, 'set')
+    jest.spyOn(cacheMock, 'get').mockReturnValueOnce(
+      new Promise((resolve)=>resolve(JSON.stringify(resultCache)))
+    )
+    const result = await sut.getStars('any_company')
+    expect(result).toEqual(resultCache)
+  })
+
+  test('Should throw if cache throws', async () => {
+    const {
+      sut,
+      cacheMock
+    } = makeSut()
+    const cacheSpySet = jest.spyOn(cacheMock, 'set')
+    jest.spyOn(cacheMock, 'get').mockReturnValueOnce(
+      new Promise((resolve, reject)=>reject(new Error()))
+    )
+    const result = sut.getStars('any_company')
+    expect(result).rejects.toThrow()
   })
 })
