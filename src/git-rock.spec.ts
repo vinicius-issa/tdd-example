@@ -1,3 +1,4 @@
+import { resolve } from 'path/posix'
 import { GitRock } from './git-rock'
 import { RockCache } from './protocols/rock-cache'
 
@@ -24,21 +25,23 @@ describe('GitRock', () => {
     }
   }
 
+  const makeFakeResult = () => [
+    {
+      name: 'repositoryA',
+      stars: 10
+    },
+    {
+      name: 'repositoryB',
+      stars: 15
+    }
+  ]
+
   test('Should getStars return the correct values', async () => {
     const {
       sut
     } = makeSut()
     const repositories = await sut.getStars('any_company')
-    expect(repositories).toEqual([
-      {
-        name: 'repositoryA',
-        stars: 10
-      },
-      {
-        name: 'repositoryB',
-        stars: 15
-      }
-    ])
+    expect(repositories).toEqual(makeFakeResult())
   })
 
   test('Should call get in CacheMock with correct value', async () => {
@@ -60,15 +63,20 @@ describe('GitRock', () => {
 
     const cacheSpy = jest.spyOn(cacheMock, 'set')
     await sut.getStars('any_company')
-    expect(cacheSpy).toBeCalledWith('any_company', JSON.stringify([
-      {
-        name: 'repositoryA',
-        stars: 10
-      },
-      {
-        name: 'repositoryB',
-        stars: 15
-      }
-    ]) )
+    expect(cacheSpy).toBeCalledWith('any_company', JSON.stringify(makeFakeResult()) )
+  })
+
+  test('Shouldnt call Cache.set if get return any value', async () => {
+    const {
+      sut,
+      cacheMock
+    } = makeSut()
+    const resultString = JSON.stringify(makeFakeResult())
+    const cacheSpySet = jest.spyOn(cacheMock, 'set')
+    jest.spyOn(cacheMock, 'get').mockReturnValueOnce(
+      new Promise((resolve)=>resolve(resultString))
+    )
+    await sut.getStars('any_company')
+    expect(cacheSpySet).not.toBeCalled()
   })
 })
