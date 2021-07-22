@@ -1,8 +1,15 @@
 import { RepositoryStars } from './protocols/repository-stars'
+import { RockCache } from './protocols/rock-cache'
 
 export class GitRock {
+  private readonly cache: RockCache
 
-  getStars(company: string): RepositoryStars[] {
+  constructor(cache: RockCache) {
+    this.cache = cache
+  }
+
+  async getStars(company: string): Promise<RepositoryStars[]> {
+    this.cache.get(company)
     return [
       {
         name: 'repositoryA',
