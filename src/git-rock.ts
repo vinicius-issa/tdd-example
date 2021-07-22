@@ -9,7 +9,7 @@ export class GitRock {
   }
 
   async getStars(company: string): Promise<RepositoryStars[]> {
-    await this.cache.get(company)
+    const hasResponse = await this.cache.get(company)
     const result = [
       {
         name: 'repositoryA',
@@ -20,7 +20,9 @@ export class GitRock {
         stars: 15
       }
     ]
-    await this.cache.set(company, JSON.stringify(result))
+    if(!hasResponse) {
+      await this.cache.set(company, JSON.stringify(result))
+    }
     return result
   }
 }
